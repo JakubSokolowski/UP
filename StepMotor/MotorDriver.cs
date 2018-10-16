@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using FTD2XX_NET;
 
 namespace StepMotor
@@ -22,12 +21,20 @@ namespace StepMotor
         HalfStep,
         FullStep
     }
+    enum RotationUnit
+    {
+        Step,
+        Degree
+    }
 
     class MotorDriver : IDisposable
     {
         public ControlMode Mode { get; set; } = ControlMode.HalfStep;
         public Direction RotationDirection { get; set; } = Direction.Right;
         public MotorID ControlledMotor { get; set; } = MotorID.First;
+        public RotationUnit Unit { get; set; } = RotationUnit.Step;
+        public int Interval { get; set; } = 1000;
+
 
         public MotorDriver(){ }
         public string Connect()
@@ -69,20 +76,40 @@ namespace StepMotor
         }
 
 
-        public void Rotate(int steps, int interval)
+        public void Rotate(int rotationValue)
         {
             // Generate sequence that matches previously set parameters
             var sequence = GenerateControlSequence(Mode, RotationDirection, ControlledMotor);
+            var steps = CalcualteSteps(rotationValue);
             uint bytesWritten = 0;
             for(int i = 0; i < steps; i++)
             {
+                // Find the next signal in sequence
+                // Prevent going out of bounds with modulo
                 int index = steps % sequence.Count;
                 byte[] signal = { sequence.ElementAt(index) };
                 status = deviceWrapper.Write(signal, 1, ref bytesWritten);
+                Thread.Sleep(Interval);
             }
             StopMotor();
         }
+        public int CalcualteSteps(int value)
+        {
+            int steps = value;
+            if(Unit == RotationUnit.Degree)            
+                steps = (int)(ControlledMotor == MotorID.First ? steps/0.75 : steps / 7.5);            
+            return steps;           
 
+        }
+
+        /// <summary>
+        /// Generates signal sequence that can rotate the motor, based on
+        /// various parameters
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="dir"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private List<byte> GenerateControlSequence(ControlMode control, Direction dir, MotorID id)
         {
             return control == ControlMode.FullStep ?
