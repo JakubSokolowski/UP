@@ -28,17 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
-            // 
-            // GUI
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(624, 450);
-            this.Name = "GUI";
-            this.Text = "GUI";
-            this.ResumeLayout(false);
-             this.lewoKat = new System.Windows.Forms.Button();
+            this.lewoKat = new System.Windows.Forms.Button();
             this.prawoKat = new System.Windows.Forms.Button();
             this.kroki = new System.Windows.Forms.TextBox();
             this.kat = new System.Windows.Forms.TextBox();
@@ -64,7 +54,6 @@
             this.lewoKat.TabIndex = 0;
             this.lewoKat.Text = "lewo s1";
             this.lewoKat.UseVisualStyleBackColor = true;
-            this.lewoKat.Click += new System.EventHandler(this.lewoKat_Click);
             // 
             // prawoKat
             // 
@@ -74,7 +63,6 @@
             this.prawoKat.TabIndex = 1;
             this.prawoKat.Text = "prawo s1";
             this.prawoKat.UseVisualStyleBackColor = true;
-            this.prawoKat.Click += new System.EventHandler(this.prawoKat_Click);
             // 
             // kroki
             // 
@@ -108,7 +96,6 @@
             this.lewoKroki.TabIndex = 5;
             this.lewoKroki.Text = "lewo s1";
             this.lewoKroki.UseVisualStyleBackColor = true;
-            this.lewoKroki.Click += new System.EventHandler(this.lewoKroki_Click);
             // 
             // prawoKroki
             // 
@@ -118,7 +105,6 @@
             this.prawoKroki.TabIndex = 6;
             this.prawoKroki.Text = "prawo s1";
             this.prawoKroki.UseVisualStyleBackColor = true;
-            this.prawoKroki.Click += new System.EventHandler(this.prawoKroki_Click);
             // 
             // label1
             // 
@@ -173,7 +159,6 @@
             this.button1.TabIndex = 12;
             this.button1.Text = "lewo s2";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // button2
             // 
@@ -183,7 +168,6 @@
             this.button2.TabIndex = 13;
             this.button2.Text = "prawo s2";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button3
             // 
@@ -193,7 +177,6 @@
             this.button3.TabIndex = 14;
             this.button3.Text = "lewo s2";
             this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button4
             // 
@@ -203,9 +186,8 @@
             this.button4.TabIndex = 15;
             this.button4.Text = "prawo s2";
             this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // Form1
+            // GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -226,7 +208,7 @@
             this.Controls.Add(this.kroki);
             this.Controls.Add(this.prawoKat);
             this.Controls.Add(this.lewoKat);
-            this.Name = "Form1";
+            this.Name = "GUI";
             this.Text = "Form1";
             this.ResumeLayout(false);
             this.PerformLayout();
