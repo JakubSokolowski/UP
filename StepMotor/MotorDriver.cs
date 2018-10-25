@@ -30,19 +30,20 @@ namespace StepMotor
 
     public class MotorDriver : IDisposable
     {
+        // Properties that control motor rotation
+        
         public ControlMode Mode { get; set; } = ControlMode.FullStep;
         public Direction RotationDirection { get; set; } = Direction.Left;
         public MotorID ControlledMotor { get; set; } = MotorID.First;
         public RotationUnit Unit { get; set; } = RotationUnit.Step;
         public int Interval { get; set; } = 100;
-        public int nextIndex { get; set; } = 0;
-        public Direction LastDirectoin { get; set; } = Direction.Left;
-
-        public int nextFullStepIndex = 0;
-        public int nextHalfStepIndex = 0;
-
+        public int RotationValue { get; set; } = 0;
 
         public MotorDriver(){ }
+        public void Dispose()
+        {
+            Disconnect();
+        }
         public string Connect()
         {           
             string message = "Unable to Connect";
@@ -78,67 +79,70 @@ namespace StepMotor
                 deviceWrapper = null;
                 Connected = false;
             }
-        }
-        public void Dispose()
-        {
-            Disconnect();
-        }
+        }      
 
-
-        public void Rotate(int rotationValue)
+        
+        public void Rotate()
         {
             if(Connected)
             {
-                // Generate sequence that matches previously set parameters
-                LastDirectoin = RotationDirection;
-                var sequence = ControlSequence.Create(Mode, RotationDirection, ControlledMotor);
-                var steps = CalcualteSteps(rotationValue);
-                uint bytesWritten = 0;
-               // var shift = (LastDirectoin == RotationDirection ? nextIndex : sequence.Count - nextIndex+1);
-                for (int i = nextIndex; i < steps; i++)
+                var steps = CalcualteSteps();
+                for (int i = 0; i < steps; i++)
                 {
-                    // Find the next signal in sequence
-                    //// Prevent going out of bounds with modulo
-                    //int index = i % sequence.Count;
-                    //nextIndex = (index + 1 )% sequence.Count;
-                    //byte[] signal = { sequence.ElementAt(index) };
-                    //status = deviceWrapper.Write(signal, 1, ref bytesWritten);
+                    // Generate next signal for current rotation parameters
+                    byte[] signal = { NextSignal() };
+                    uint bytesWritten = 0;
+                    status = deviceWrapper.Write(signal, 1, ref bytesWritten);
                     Thread.Sleep(Interval);
                 }
             }
           
         }
-        public int CalcualteSteps(int value)
+        private byte NextSignal()
         {
-            int steps = value;
+            switch (Mode)
+            {
+                case ControlMode.HalfStep:
+                    return HS.NextSignal(RotationDirection);
+                case ControlMode.FullStep:
+                    return FS.NextSignal(RotationDirection);
+                case ControlMode.WaveStep:
+                    return WS.NextSignal(RotationDirection);
+                default:
+                    return HS.NextSignal(RotationDirection);
+            }
+        }
+        private void StopMotor()
+        {
+            uint bytesWritten = 0;
+            status = deviceWrapper.Write(new byte[] { 0x00 }, 1, ref bytesWritten);
+        }
+        private int CalcualteSteps()
+        {
+            int steps = RotationValue;
             if(Unit == RotationUnit.Degree)            
                 steps = (int)(ControlledMotor == MotorID.First ? steps/0.75 : steps / 7.5);            
             return steps;           
 
         }
-        
-
-   
-       
-
-    
-
         private string ReadEprom()
         {
             string str = "";
-            if(Connected)
+            if (Connected)
             {
-                status = deviceWrapper.ReadFT232BEEPROM(new FTDI.FT232B_EEPROM_STRUCTURE());
+                var deviceInfo = new FTDI.FT232B_EEPROM_STRUCTURE();
+                status = deviceWrapper.ReadFT232BEEPROM(deviceInfo);
+                return deviceInfo.Description;
             }
             return str;
         }
+   
+        // Signal Sequences that need to be written to motor to rotate it in specific way
+        // dictated by parameters
 
-
-        private void StopMotor()
-        {
-            uint bytesWritten = 0;
-            status = deviceWrapper.Write(new byte[]{0x00}, 1, ref bytesWritten);
-        }
+        private ControlSequence HS = ControlSequence.Create(ControlMode.HalfStep, Direction.Right, MotorID.First);
+        private ControlSequence FS = ControlSequence.Create(ControlMode.FullStep, Direction.Right, MotorID.First);
+        private ControlSequence WS = ControlSequence.Create(ControlMode.WaveStep, Direction.Right, MotorID.First);      
       
         private bool Connected { get; set; } = false;
         private FTDI deviceWrapper = new FTDI();
