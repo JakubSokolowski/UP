@@ -63,7 +63,6 @@ namespace StepMotor
                 sequence.ToList().ForEach(s => s = (byte)(s & 0x0F));
             return sequence;
         }
-
     
         public byte NextSignal(Direction direction)
         {
